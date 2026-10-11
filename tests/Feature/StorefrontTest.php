@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -9,13 +10,26 @@ class StorefrontTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
+    public function test_the_storefront_homepage_shows_the_creator_footer(): void
     {
-        $response = $this->get('/');
+        $this->get(route('storefront.index'))
+            ->assertOk()
+            ->assertSee('Created by Irfan Dossani');
+    }
 
-        $response->assertStatus(200);
+    public function test_a_published_product_page_shows_the_creator_footer(): void
+    {
+        $product = Product::factory()->create(['is_published' => true, 'published_at' => now()]);
+
+        $this->get(route('storefront.show', $product))
+            ->assertOk()
+            ->assertSee('Created by Irfan Dossani');
+    }
+
+    public function test_the_support_page_shows_the_creator_footer(): void
+    {
+        $this->get(route('support'))
+            ->assertOk()
+            ->assertSee('Created by Irfan Dossani');
     }
 }

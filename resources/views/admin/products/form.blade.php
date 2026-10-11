@@ -46,4 +46,4 @@
             </div>
         @endif
     @endif
-</main></body></html>
+@include('partials.footer')</main></body></html>

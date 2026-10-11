@@ -15,4 +15,4 @@
     @empty<tr><td colspan="5">No products yet. Add your first product to begin the catalogue.</td></tr>@endforelse
     </tbody></table></div>
     @if($products->hasPages())<nav class="pagination" aria-label="Product pages">@if($products->onFirstPage())<span>Previous</span>@else<a href="{{ $products->previousPageUrl() }}">Previous</a>@endif <span>Page {{ $products->currentPage() }} of {{ $products->lastPage() }}</span> @if($products->hasMorePages())<a href="{{ $products->nextPageUrl() }}">Next</a>@else<span>Next</span>@endif</nav>@endif
-</main></body></html>
+@include('partials.footer')</main></body></html>

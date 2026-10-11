@@ -61,6 +61,6 @@
             @if ($users->hasMorePages()) <a href="{{ $users->nextPageUrl() }}">Next</a> @else <span>Next</span> @endif
         </nav>
     @endif
-</main>
+@include('partials.footer')</main>
 </body>
 </html>
