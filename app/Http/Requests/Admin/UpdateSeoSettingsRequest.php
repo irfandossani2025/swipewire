@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSeoSettingsRequest extends FormRequest
 {
@@ -24,7 +25,7 @@ class UpdateSeoSettingsRequest extends FormRequest
         return [
             'site_title' => ['required', 'string', 'max:255'],
             'site_description' => ['required', 'string', 'max:320'],
-            'robots' => ['required', 'in:index,follow,noindex,nofollow'],
+            'robots' => ['required', Rule::in(['index,follow', 'noindex,nofollow'])],
         ];
     }
 }

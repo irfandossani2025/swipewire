@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,5 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        View::composer('layouts.store', function (\Illuminate\View\View $view): void {
+            $view->with('siteSettings', once(fn () => SiteSetting::query()->pluck('value', 'key')));
+        });
     }
 }

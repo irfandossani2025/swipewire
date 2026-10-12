@@ -1,1 +1,39 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create account | Swipewire</title><style>body{font-family:Arial,sans-serif;background:#faf9f5;color:#1c2b23;margin:0}main{max-width:480px;margin:60px auto;padding:32px;background:#fff;border:1px solid #e4e3dd;border-radius:24px}label{display:block;margin:15px 0 6px;font-weight:bold}input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cfd5ce;border-radius:10px}button{margin-top:22px;background:#173d2d;color:#fff;border:0;padding:13px 18px;border-radius:99px;font-weight:bold}small{color:#5d675f}.error{color:#9b2121}</style></head><body><main><a href="{{ route('storefront.index') }}">← Swipewire</a><h1>Create your account</h1><p>Keep every digital product you purchase in one permanent library.</p><form method="post" action="{{ route('register.store') }}">@csrf<label for="name">Name</label><input id="name" name="name" value="{{ old('name') }}" required autofocus><label for="email">Email address</label><input id="email" type="email" name="email" value="{{ old('email') }}" required><label for="password">Password</label><input id="password" type="password" name="password" required><label for="password_confirmation">Confirm password</label><input id="password_confirmation" type="password" name="password_confirmation" required><label style="font-weight:normal"><input style="width:auto" type="checkbox" name="marketing_consent" value="1" {{ old('marketing_consent') ? 'checked' : '' }}> Send me occasional product news and useful offers.</label><small>You can unsubscribe at any time.</small>@if($errors->any())<p class="error">{{ $errors->first() }}</p>@endif<button type="submit">Create my account</button></form><p>Already have an account? <a href="{{ route('login') }}">Sign in</a></p>@include('partials.footer')</main></body></html>
+@extends('layouts.store')
+
+@section('title', 'Create account | Swipewire')
+
+@section('content')
+    <div class="container auth-shell">
+        <div class="card auth-card">
+            <span class="eyebrow">Free account</span>
+            <h1 style="margin-top:8px">Create your account</h1>
+            <p class="lead">Keep every product you get in one permanent library.</p>
+
+            <form method="post" action="{{ route('register.store') }}">
+                @csrf
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" value="{{ old('name') }}" autocomplete="name" required autofocus>
+                </div>
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" autocomplete="new-password" required>
+                </div>
+                <div class="field">
+                    <label for="password_confirmation">Confirm password</label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" required>
+                </div>
+                <div class="field">
+                    <label class="checkbox"><input type="checkbox" name="marketing_consent" value="1" @checked(old('marketing_consent'))> <span>Send me occasional product news and useful offers. <span class="hint" style="display:inline">You can unsubscribe at any time.</span></span></label>
+                </div>
+                @if($errors->any())<p class="error" style="margin-top:16px">{{ $errors->first() }}</p>@endif
+                <div class="form-actions"><button class="button button-block" type="submit">Create my account</button></div>
+            </form>
+            <p class="auth-switch">Already have an account? <a href="{{ route('login') }}">Sign in</a></p>
+        </div>
+    </div>
+@endsection

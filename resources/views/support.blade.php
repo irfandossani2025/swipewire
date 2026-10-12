@@ -1,2 +1,45 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Support · Swipewire</title><style>body{margin:0;background:#faf9f5;color:#1c2b23;font-family:Arial,sans-serif}main{max-width:700px;margin:auto;padding:42px 24px}a{color:#426444}h1{font-size:clamp(2.2rem,7vw,4rem);letter-spacing:-.05em;margin:20px 0 10px}p{line-height:1.6;color:#53645c}form{margin-top:28px;padding:28px;background:#fff;border:1px solid #e4e3dd;border-radius:20px}label{display:block;font-weight:bold;margin:16px 0 6px}input,textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cfd9d0;border-radius:8px;font:inherit}textarea{min-height:140px}.button{margin-top:22px;background:#173d2d;color:#fff;border:0;padding:12px 17px;border-radius:99px;font:inherit;cursor:pointer}.notice{padding:12px;color:#0c6258;background:#e5f6f1;border-radius:10px}.error{padding:12px;color:#972d20;background:#fff0eb;border-radius:10px}</style></head><body><main><a href="{{ route('storefront.index') }}">← Back to Swipewire</a><h1>How can we help?</h1><p>Tell us what happened and our support team will receive your message at <strong>support@techittechnologies.com</strong>.</p>@if(session('support-status'))<p class="notice">{{ session('support-status') }}</p>@endif @error('support')<p class="error">{{ $message }}</p>@enderror<form method="post" action="{{ route('support.store') }}">@csrf<label for="name">Your name</label><input id="name" name="name" value="{{ old('name', auth()->user()?->name) }}" required><label for="email">Email address</label><input id="email" name="email" type="email" value="{{ old('email', auth()->user()?->email) }}" required><label for="subject">Subject</label><input id="subject" name="subject" value="{{ old('subject') }}" required><label for="message">How can we help?</label><textarea id="message" name="message" required>{{ old('message') }}</textarea><button class="button" type="submit">Send to support</button></form>@include('partials.footer')</main></body></html>
+@extends('layouts.store')
+
+@section('title', 'Help & support | Swipewire')
+@section('description', 'Questions about a download or an order? Send the Swipewire support team a message.')
+
+@section('content')
+    <div class="container-narrow page-head">
+        <span class="eyebrow">Help &amp; support</span>
+        <h1>How can we help?</h1>
+        <p class="lead">Tell us what happened and our team will reply by email. Messages go to <strong>support@techittechnologies.com</strong>.</p>
+    </div>
+
+    <div class="container-narrow section-tight">
+        @if(session('support-status'))<p class="notice" style="margin-bottom:20px">{{ session('support-status') }}</p>@endif
+        @error('support')<p class="error" style="margin-bottom:20px">{{ $message }}</p>@enderror
+
+        <form class="card" method="post" action="{{ route('support.store') }}">
+            @csrf
+            <div class="form-grid">
+                <div>
+                    <label for="name">Your name</label>
+                    <input id="name" name="name" value="{{ old('name', auth()->user()?->name) }}" autocomplete="name" required>
+                    @error('name')<span class="hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label for="email">Email address</label>
+                    <input id="email" name="email" type="email" value="{{ old('email', auth()->user()?->email) }}" autocomplete="email" required>
+                    @error('email')<span class="hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+                </div>
+                <div class="full">
+                    <label for="subject">Subject</label>
+                    <input id="subject" name="subject" value="{{ old('subject') }}" required>
+                    @error('subject')<span class="hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+                </div>
+                <div class="full">
+                    <label for="message">How can we help?</label>
+                    <textarea id="message" name="message" maxlength="1000" required>{{ old('message') }}</textarea>
+                    @error('message')<span class="hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+                    <span class="hint">Include your order number if your question is about a purchase.</span>
+                </div>
+            </div>
+            <div class="form-actions"><button class="button" type="submit">Send to support</button></div>
+        </form>
+    </div>
+@endsection

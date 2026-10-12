@@ -1,1 +1,28 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in | Swipewire</title><style>body{font-family:Arial,sans-serif;background:#faf9f5;color:#1c2b23;margin:0}main{max-width:440px;margin:60px auto;padding:32px;background:#fff;border:1px solid #e4e3dd;border-radius:24px}label{display:block;margin:15px 0 6px;font-weight:bold}input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cfd5ce;border-radius:10px}button{margin-top:22px;background:#173d2d;color:#fff;border:0;padding:13px 18px;border-radius:99px;font-weight:bold}.error{color:#9b2121}</style></head><body><main><a href="{{ route('storefront.index') }}">← Swipewire</a><h1>Welcome back</h1><p>Sign in to access your digital library.</p><form method="post" action="{{ route('login.store') }}">@csrf<label for="email">Email address</label><input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus><label for="password">Password</label><input id="password" type="password" name="password" required>@error('email')<p class="error">{{ $message }}</p>@enderror<button type="submit">Sign in</button></form><p>New to Swipewire? <a href="{{ route('register') }}">Create an account</a></p>@include('partials.footer')</main></body></html>
+@extends('layouts.store')
+
+@section('title', 'Sign in | Swipewire')
+
+@section('content')
+    <div class="container auth-shell">
+        <div class="card auth-card">
+            <span class="eyebrow">Your library</span>
+            <h1 style="margin-top:8px">Welcome back</h1>
+            <p class="lead">Sign in to download everything in your library.</p>
+
+            <form method="post" action="{{ route('login.store') }}">
+                @csrf
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" autocomplete="current-password" required>
+                </div>
+                @error('email')<p class="error" style="margin-top:16px">{{ $message }}</p>@enderror
+                <div class="form-actions"><button class="button button-block" type="submit">Sign in</button></div>
+            </form>
+            <p class="auth-switch">New to Swipewire? <a href="{{ route('register') }}">Create an account</a></p>
+        </div>
+    </div>
+@endsection

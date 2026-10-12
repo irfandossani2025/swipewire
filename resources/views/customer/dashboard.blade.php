@@ -1,1 +1,49 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My downloads | Swipewire</title><style>body{font-family:Arial,sans-serif;background:#faf9f5;color:#1c2b23;margin:0}main{max-width:900px;margin:auto;padding:42px 24px}.order{background:#fff;border:1px solid #e4e3dd;border-radius:20px;padding:24px;margin:18px 0}.file{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #eee}.button{background:#173d2d;color:#fff;padding:10px 14px;border-radius:99px;text-decoration:none}.notice{padding:12px;color:#0c6258;background:#e5f6f1;border-radius:10px}.error{padding:12px;color:#972d20;background:#fff0eb;border-radius:10px}</style></head><body><main><a href="{{ route('storefront.index') }}">← Continue shopping</a><h1>My downloads</h1><p>Everything you have purchased stays here for you to download again whenever you need it.</p>@if(session('status'))<p class="notice">{{ session('status') }}</p>@endif @error('checkout')<p class="error">{{ $message }}</p>@enderror @forelse($orders as $order)<section class="order"><strong>Order {{ $order->number }}</strong><p>Paid {{ $order->paid_at?->format('d M Y') }}</p>@foreach($order->items as $item)<h2>{{ $item->product_title }}</h2>@foreach($item->product->files as $file)<div class="file"><span>{{ $file->original_name }}</span><a class="button" href="{{ route('downloads.show',$file) }}">Download</a></div>@endforeach @endforeach</section>@empty<section class="order"><h2>No purchases yet</h2><p>When you buy a digital product, it will appear here permanently.</p></section>@endforelse @include('partials.footer')</main></body></html>
+@extends('layouts.store')
+
+@section('title', 'My library | Swipewire')
+@section('robots', 'noindex,nofollow')
+
+@section('content')
+    <div class="container page-head">
+        <span class="eyebrow">My library</span>
+        <h1>Your downloads</h1>
+        <p class="lead">Everything you get stays here, ready to download again whenever you need it.</p>
+    </div>
+
+    <div class="container section-tight">
+        @if(session('status'))
+            <p class="notice" style="margin-bottom:20px">{{ session('status') }}</p>
+        @endif
+        @error('checkout')
+            <p class="error" style="margin-bottom:20px">{{ $message }}</p>
+        @enderror
+
+        <div class="library">
+            @forelse($orders as $order)
+                @foreach($order->items as $item)
+                    <article class="library-item">
+                        @include('partials.product-tile', ['product' => $item->product])
+                        <div>
+                            <h2 style="font-size:1.125rem">{{ $item->product_title }}</h2>
+                            <p class="muted" style="font-size:.875rem">Order {{ $order->number }} · {{ $order->paid_at?->format('j M Y') }}</p>
+                            <div class="library-files">
+                                @foreach($item->product->files as $file)
+                                    <div class="file-row">
+                                        <span class="name">{{ $file->original_name }}</span>
+                                        <a class="button button-small" href="{{ route('downloads.show', $file) }}">Download</a>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </article>
+                @endforeach
+            @empty
+                <div class="empty-state">
+                    <h2 style="font-size:1.25rem">Your library is ready for its first download</h2>
+                    <p>When you buy a product or add a free one, it appears here permanently.</p>
+                    <a class="button" style="margin-top:20px" href="{{ route('storefront.index') }}#collection">Browse products</a>
+                </div>
+            @endforelse
+        </div>
+    </div>
+@endsection

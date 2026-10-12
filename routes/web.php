@@ -24,6 +24,7 @@ Route::view('/register', 'auth.register')->middleware('guest')->name('register')
 Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('guest')->name('register.store');
 Route::view('/login', 'auth.login')->middleware('guest')->name('login');
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('guest')->name('login.store');
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth')->name('logout');
 Route::post('/products/{product:slug}/checkout', [CheckoutController::class, 'store'])->middleware(['auth', 'active'])->name('checkout.store');
 Route::get('/checkout/paypal/return', [CheckoutController::class, 'paypalReturn'])->middleware(['auth', 'active'])->name('checkout.paypal.return');
 Route::get('/checkout/paypal/cancel', [CheckoutController::class, 'paypalCancel'])->middleware(['auth', 'active'])->name('checkout.paypal.cancel');

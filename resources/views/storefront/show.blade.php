@@ -1,1 +1,68 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ $product->seo_title ?: $product->title.' | Swipewire' }}</title><meta name="description" content="{{ $product->seo_description ?: \Illuminate\Support\Str::limit(strip_tags($product->description),155) }}"></head><body style="margin:0;background:#faf9f5;color:#1c2b23;font-family:Arial,sans-serif"><main style="max-width:820px;margin:auto;padding:42px 24px"><a href="{{ route('storefront.index') }}" style="color:#426444">← Back to collection</a><article style="margin-top:30px;background:#fff;border:1px solid #e4e3dd;border-radius:28px;padding:42px"><strong style="color:#426444">{{ $product->price == 0 ? 'Free download' : '$'.number_format((float)$product->price,2) }}</strong><h1>{{ $product->title }}</h1><p style="white-space:pre-line;line-height:1.6">{{ $product->description }}</p>@error('checkout')<p style="padding:12px;color:#972d20;background:#fff0eb;border-radius:10px">{{ $message }}</p>@enderror @auth<form method="post" action="{{ route('checkout.store',$product) }}">@csrf<button type="submit" style="border:0;display:inline-block;background:#173d2d;color:white;padding:14px 20px;border-radius:99px;font:inherit;cursor:pointer">{{ $product->price == 0 ? 'Add free product to library' : 'Pay securely with PayPal' }}</button></form>@else<a href="{{ route('register') }}" style="display:inline-block;background:#173d2d;color:white;padding:14px 20px;border-radius:99px;text-decoration:none">Create an account to get this product</a><p style="color:#60706a">Already a customer? <a href="{{ route('login') }}">Sign in</a> to purchase and keep downloads in your library.</p>@endauth</article>@include('partials.footer')</main></body></html>
+@extends('layouts.store')
+
+@section('title', $product->seo_title ?: $product->shortTitle().' | Swipewire')
+@section('description', $product->seo_description ?: $product->summary(155))
+
+@section('content')
+    <div class="container section-tight">
+        <a class="breadcrumb" href="{{ route('storefront.index') }}#collection">← Back to collection</a>
+
+        <div class="product-layout">
+            <article>
+                @include('partials.product-tile', ['product' => $product])
+                <h1 class="product-title">{{ $product->shortTitle() }}</h1>
+                @if($product->titleDetail())
+                    <p class="product-detail-line">{{ $product->titleDetail() }}</p>
+                @endif
+                <div class="prose">{{ $product->description }}</div>
+            </article>
+
+            <aside class="buy-panel" aria-label="Get this product">
+                @if($product->isFree())
+                    <span class="pill pill-free">Free download</span>
+                @endif
+                <p class="price" style="margin-top:8px">{{ $product->priceLabel() }}</p>
+                <p class="muted">{{ $product->isFree() ? 'Add it to your library at no cost.' : 'One-time purchase · USD' }}</p>
+
+                @error('checkout')<p class="error">{{ $message }}</p>@enderror
+
+                @auth
+                    <form method="post" action="{{ route('checkout.store', $product) }}">
+                        @csrf
+                        <button class="button button-block" type="submit">{{ $product->isFree() ? 'Add free product to library' : 'Pay securely with PayPal' }}</button>
+                    </form>
+                @else
+                    <a class="button button-block" style="margin-top:20px" href="{{ route('register') }}">Create an account to get this product</a>
+                    <p class="muted" style="margin-top:12px;font-size:.9375rem">Already a customer? <a href="{{ route('login') }}">Sign in</a> to purchase and keep downloads in your library.</p>
+                @endauth
+
+                <ul class="check-list">
+                    <li>Instant download after {{ $product->isFree() ? 'adding it' : 'payment' }}</li>
+                    <li>Kept permanently in your Swipewire library</li>
+                    @foreach($product->files as $file)
+                        <li>{{ \Illuminate\Support\Str::upper(pathinfo($file->original_name, PATHINFO_EXTENSION)) ?: 'File' }} · {{ \Illuminate\Support\Number::fileSize($file->size_bytes, precision: 1) }}</li>
+                    @endforeach
+                    <li>Questions? <a href="{{ route('support') }}">Contact support</a></li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+
+    @if($related->isNotEmpty())
+        <section class="section section-mist">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">More like this</span>
+                        <h2>You might also find useful</h2>
+                    </div>
+                </div>
+                <div class="product-grid">
+                    @foreach($related as $relatedProduct)
+                        @include('partials.product-card', ['product' => $relatedProduct])
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+@endsection
