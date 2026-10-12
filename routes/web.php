@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProductFileChunkController as AdminProductFileChunkController;
 use App\Http\Controllers\Admin\ProductFileController as AdminProductFileController;
 use App\Http\Controllers\Admin\SeoSettingsController;
 use App\Http\Controllers\Admin\SubscriberController;
@@ -35,6 +36,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
     Route::resource('products', AdminProductController::class)->except(['show', 'destroy']);
     Route::post('/products/{product}/files', [AdminProductFileController::class, 'store'])->name('products.files.store');
+    Route::post('/products/{product}/uploads', [AdminProductFileChunkController::class, 'start'])->name('products.uploads.start');
+    Route::post('/products/{product}/uploads/{upload}/chunks', [AdminProductFileChunkController::class, 'storeChunk'])->whereUuid('upload')->name('products.uploads.chunks.store');
+    Route::post('/products/{product}/uploads/{upload}/complete', [AdminProductFileChunkController::class, 'complete'])->whereUuid('upload')->name('products.uploads.complete');
     Route::delete('/products/{product}/files/{productFile}', [AdminProductFileController::class, 'destroy'])->name('products.files.destroy');
     Route::get('/seo', [SeoSettingsController::class, 'edit'])->name('seo.edit');
     Route::put('/seo', [SeoSettingsController::class, 'update'])->name('seo.update');

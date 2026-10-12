@@ -29,12 +29,82 @@
         <div class="actions"><button class="button" type="submit">{{ $product->exists ? 'Save product' : 'Create product' }}</button><a class="secondary" href="{{ route('admin.products.index') }}">Cancel</a></div>
     </form>
     @if($product->exists)
-        <form method="post" action="{{ route('admin.products.files.store', $product) }}" enctype="multipart/form-data">
+        <form id="product-file-upload" method="post" action="{{ route('admin.products.files.store', $product) }}" enctype="multipart/form-data" data-start-url="{{ route('admin.products.uploads.start', $product) }}" data-chunk-url="{{ route('admin.products.uploads.chunks.store', [$product, '00000000-0000-0000-0000-000000000000']) }}" data-complete-url="{{ route('admin.products.uploads.complete', [$product, '00000000-0000-0000-0000-000000000000']) }}">
             @csrf
             <h2>Private download files</h2>
             <p class="intro">Uploaded files are stored privately and are served only through the customer download authorization check.</p>
-            <div class="full" style="margin-top:18px"><label for="file">Add a product file</label><input id="file" type="file" name="file" required><span class="hint">Maximum upload size: 500 MB. ZIP, PDF, templates, spreadsheets, and other digital product formats are supported.</span></div>
+            <div class="full" style="margin-top:18px">
+<label for="file">Add a product file</label>
+<input id="file" type="file" name="file" required>
+<span class="hint">Maximum upload size: 500 MB. Large files are sent in small pieces, so keep this page open until the upload finishes.</span>
+</div>
+            <div id="upload-progress" hidden style="margin-top:14px"><progress max="100" value="0" style="width:100%;height:14px"></progress><span class="hint" data-upload-status></span></div>
+            <p id="upload-error" class="error" hidden style="color:#a54232;margin-top:12px"></p>
+            <button type="submit" style="margin-top:16px">Upload file</button>
         </form>
+        <script>
+            (() => {
+                const form = document.getElementById('product-file-upload');
+                const progress = document.getElementById('upload-progress');
+                const status = progress.querySelector('[data-upload-status]');
+                const bar = progress.querySelector('progress');
+                const errorBox = document.getElementById('upload-error');
+                const placeholder = '00000000-0000-0000-0000-000000000000';
+                const headers = { 'X-CSRF-TOKEN': form.querySelector('input[name=_token]').value, 'Accept': 'application/json' };
+
+                const send = async (url, body, attempts = 3) => {
+                    for (let attempt = 1; ; attempt++) {
+                        const response = await fetch(url, { method: 'POST', headers, body, credentials: 'same-origin' });
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        if (attempt >= attempts || response.status < 500) {
+                            const payload = await response.json().catch(() => ({}));
+                            throw new Error(Object.values(payload.errors || {}).flat()[0] || payload.message || `Upload failed (HTTP ${response.status}).`);
+                        }
+                        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+                    }
+                };
+
+                form.addEventListener('submit', async (event) => {
+                    const file = form.querySelector('input[type=file]').files[0];
+                    if (!file || !window.fetch) {
+                        return;
+                    }
+                    event.preventDefault();
+                    const button = form.querySelector('button[type=submit]');
+                    button.disabled = true;
+                    errorBox.hidden = true;
+                    progress.hidden = false;
+
+                    try {
+                        const startBody = new FormData();
+                        startBody.append('original_name', file.name);
+                        startBody.append('size_bytes', file.size);
+                        const upload = await send(form.dataset.startUrl, startBody);
+                        const chunkUrl = form.dataset.chunkUrl.replace(placeholder, upload.upload_id);
+
+                        for (let index = 0; index < upload.total_chunks; index++) {
+                            const piece = new FormData();
+                            piece.append('index', index);
+                            piece.append('chunk', file.slice(index * upload.chunk_size, (index + 1) * upload.chunk_size), 'chunk');
+                            await send(chunkUrl, piece);
+                            const percent = Math.round(((index + 1) / upload.total_chunks) * 100);
+                            bar.value = percent;
+                            status.textContent = ` ${percent}% (${Math.min((index + 1) * upload.chunk_size, file.size).toLocaleString()} of ${file.size.toLocaleString()} bytes)`;
+                        }
+
+                        status.textContent = ' Finishing and verifying the file…';
+                        const result = await send(form.dataset.completeUrl.replace(placeholder, upload.upload_id), new FormData(), 1);
+                        window.location.assign(result.redirect);
+                    } catch (error) {
+                        errorBox.textContent = error.message;
+                        errorBox.hidden = false;
+                        button.disabled = false;
+                    }
+                });
+            })();
+        </script>
         @if($product->files->isNotEmpty())
             <div style="margin-top:24px; border-top:1px solid #e6edef; padding-top:16px">
                 @foreach($product->files as $file)
