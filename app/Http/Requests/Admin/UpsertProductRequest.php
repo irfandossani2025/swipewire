@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpsertProductRequest extends FormRequest
 {
@@ -34,6 +35,29 @@ class UpsertProductRequest extends FormRequest
             'seo_description' => ['nullable', 'string', 'max:320'],
             'is_published' => ['nullable', 'boolean'],
             'is_featured' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * A product may only go on sale once a downloadable file is attached, so
+     * customers can never pay for something they cannot download.
+     *
+     * @return array<int, callable>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                if (! $this->boolean('is_published')) {
+                    return;
+                }
+
+                $product = $this->route('product');
+
+                if (! $product instanceof Product || ! $product->files()->exists()) {
+                    $validator->errors()->add('is_published', 'Upload this product\'s downloadable file before publishing it.');
+                }
+            },
         ];
     }
 }

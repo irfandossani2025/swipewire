@@ -36,6 +36,12 @@ class ProductFileController extends Controller
         Storage::disk($productFile->disk)->delete($productFile->path);
         $productFile->delete();
 
+        if ($product->is_published && ! $product->files()->exists()) {
+            $product->update(['is_published' => false, 'published_at' => null]);
+
+            return to_route('admin.products.edit', $product)->with('status', 'Product file removed. The product has been unpublished because it no longer has a downloadable file.');
+        }
+
         return to_route('admin.products.edit', $product)->with('status', 'Product file removed.');
     }
 }
